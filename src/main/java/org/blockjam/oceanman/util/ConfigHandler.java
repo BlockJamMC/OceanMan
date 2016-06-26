@@ -22,6 +22,7 @@ public class ConfigHandler {
     public final int MIN_OCEAN_DISTANCE;
     public final double MAX_OCEAN_CONTENT;
     public final int SCAN_RADIUS;
+    public final int DESIRED_SEEDS;
 
     public ConfigHandler(File configFile, ConfigurationLoader<CommentedConfigurationNode> loader) throws IOException {
         this.configFile = configFile;
@@ -32,6 +33,7 @@ public class ConfigHandler {
         MIN_OCEAN_DISTANCE = config.getNode("min-ocean-distance").getInt();
         MAX_OCEAN_CONTENT = config.getNode("max-ocean-content").getDouble();
         SCAN_RADIUS = config.getNode("scan-radius").getInt();
+        DESIRED_SEEDS = config.getNode("desired-seeds").getInt();
     }
 
     public void loadDefaults() throws IOException {

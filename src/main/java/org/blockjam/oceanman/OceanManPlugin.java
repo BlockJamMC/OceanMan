@@ -9,11 +9,16 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Main plugin class.
@@ -41,6 +46,30 @@ public class OceanManPlugin {
             configHandler = new ConfigHandler(config, configLoader);
         } catch (IOException ex) {
             throw new RuntimeException("Failed to load config", ex);
+        }
+    }
+
+    public void onStarted(GameStartedServerEvent event) {
+        WorldScanner scanner = new WorldScanner();
+        Set<Long> seeds = new HashSet<>();
+        while (seeds.size() < config().DESIRED_SEEDS) {
+            Optional<Long> seed = scanner.scanWorld();
+            if (seed.isPresent()) {
+                seeds.add(seed.get());
+                logger().info("Stored seed (current count: " + seeds.size() + ")");
+            }
+        }
+        logger().info("Saving " + seeds.size() + " to disk");
+        try (FileWriter writer = new FileWriter(seedStore)) {
+            seeds.forEach(s -> {
+                try {
+                    writer.write(s + "\n");
+                } catch (IOException ex) {
+                    throw new RuntimeException("Failed to write seed to disk", ex);
+                }
+            });
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to write seeds to disk", ex);
         }
     }
 
