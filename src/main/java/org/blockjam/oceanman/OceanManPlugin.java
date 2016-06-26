@@ -1,9 +1,34 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016, BlockJam <https://blockjam.org>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 package org.blockjam.oceanman;
+
+import org.blockjam.oceanman.util.ConfigHandler;
 
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.blockjam.oceanman.util.ConfigHandler;
 import org.slf4j.Logger;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
@@ -16,6 +41,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +60,7 @@ public class OceanManPlugin {
     @Inject private Logger logger;
     @Inject @DefaultConfig(sharedRoot = false) private File config;
     @Inject @ConfigDir(sharedRoot = false) private File configDir;
-    @Inject private ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    @Inject @DefaultConfig(sharedRoot = false) private ConfigurationLoader<CommentedConfigurationNode> configLoader;
 
     private ConfigHandler configHandler;
 
@@ -49,10 +75,11 @@ public class OceanManPlugin {
         }
     }
 
+    @Listener
     public void onStarted(GameStartedServerEvent event) {
         WorldScanner scanner = new WorldScanner();
         Set<Long> seeds = new HashSet<>();
-        while (seeds.size() < config().DESIRED_SEEDS) {
+        while (seeds.size() < config().desiredSeeds) {
             Optional<Long> seed = scanner.scanWorld();
             if (seed.isPresent()) {
                 seeds.add(seed.get());
@@ -60,14 +87,17 @@ public class OceanManPlugin {
             }
         }
         logger().info("Saving " + seeds.size() + " to disk");
-        try (FileWriter writer = new FileWriter(seedStore)) {
-            seeds.forEach(s -> {
-                try {
-                    writer.write(s + "\n");
-                } catch (IOException ex) {
-                    throw new RuntimeException("Failed to write seed to disk", ex);
-                }
-            });
+        try {
+            Files.createFile(seedStore.toPath());
+            try (FileWriter writer = new FileWriter(seedStore)) {
+                seeds.forEach(s -> {
+                    try {
+                        writer.write(s + "\n");
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to write seed to disk", ex);
+                    }
+                });
+            }
         } catch (IOException ex) {
             throw new RuntimeException("Failed to write seeds to disk", ex);
         }
