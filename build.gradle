@@ -1,0 +1,103 @@
+plugins {
+    id 'java'
+
+    id 'idea'
+    id 'eclipse'
+    id 'checkstyle'
+
+    id 'org.spongepowered.plugin' version '0.5.2'
+    id 'net.minecrell.licenser' version '0.2.1'
+}
+defaultTasks 'clean', 'updateLicenses', 'build'
+
+// Project information
+group = 'org.blockjam.oceanman'
+version = '1.0.0-SNAPSHOT'
+
+// Extended project information
+ext.projectName = 'oceanman'
+ext.description = 'Ocean-oriented Minecraft chunk scanner as a Sponge plugin.'
+ext.inceptionYear = '2016'
+ext.packaging = 'jar'
+ext.versionSuffix = version.contains('SNAPSHOT') ? (
+        (
+        System.getenv('GIT_COMMIT') ? ('-git('
+                + System.getenv('GIT_BRANCH')
+                .substring(System.getenv('GIT_BRANCH').split('/')[0].length() + 1) + '-'
+                + System.getenv('GIT_COMMIT').substring(0, 7) + ')') : ''
+        )
+        + (System.getenv('BUILD_NUMBER') ? '-jnks' + System.getenv('BUILD_NUMBER') : '')
+) : ''
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations {
+    deployerJars
+}
+
+// Project repositories
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        name 'sponge'
+        url 'http://repo.spongepowered.org/maven'
+    }
+}
+
+// Project dependencies
+dependencies {
+    compile 'org.spongepowered:spongeapi:5.0.0-SNAPSHOT'
+
+    checkstyle 'org.spongepowered:checkstyle:6.1.1-sponge1'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+processResources {
+    from 'LICENSE'
+}
+
+// License header formatting
+license {
+    ignoreFailures false
+}
+
+// check code style
+checkstyle {
+    configProperties = [
+            'name'        : project.name,
+            'year'        : project.inceptionYear,
+            'basedir': project.projectDir,
+            'severity': 'warning'
+    ]
+    configFile = file('etc/checkstyle.xml')
+}
+
+tasks.withType(Checkstyle){
+    exclude '**/*.properties'
+}
+
+jar.manifest.mainAttributes(
+        'Created-By': System.properties['java.vm.version'] + " (" + System.properties['java.vm.vendor'] + ")",
+        'Implementation-Title': name,
+        'Implementation-Version': version + versionSuffix,
+)
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.java
+    from sourceSets.main.resources
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.14'
+}
