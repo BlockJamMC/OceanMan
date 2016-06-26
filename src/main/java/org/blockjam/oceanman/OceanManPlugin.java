@@ -5,6 +5,8 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.blockjam.oceanman.util.ConfigHandler;
 import org.slf4j.Logger;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -21,9 +23,12 @@ public class OceanManPlugin {
 
     private static OceanManPlugin instance;
 
+    private static File seedStore;
+
     @Inject private PluginContainer plugin;
     @Inject private Logger logger;
-    @Inject private File config;
+    @Inject @DefaultConfig(sharedRoot = false) private File config;
+    @Inject @ConfigDir(sharedRoot = false) private File configDir;
     @Inject private ConfigurationLoader<CommentedConfigurationNode> configLoader;
 
     private ConfigHandler configHandler;
@@ -31,6 +36,7 @@ public class OceanManPlugin {
     @Listener
     public void onPreInitialization(GamePreInitializationEvent event) {
         instance = this;
+        seedStore = new File(configDir, "seeds.txt");
         try {
             configHandler = new ConfigHandler(config, configLoader);
         } catch (IOException ex) {
@@ -48,6 +54,10 @@ public class OceanManPlugin {
 
     public static Logger logger() {
         return instance().logger;
+    }
+
+    public static ConfigHandler config() {
+        return instance().configHandler;
     }
 
 }
