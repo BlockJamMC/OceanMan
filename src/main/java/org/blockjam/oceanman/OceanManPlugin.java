@@ -78,28 +78,23 @@ public class OceanManPlugin {
     @Listener
     public void onStarted(GameStartedServerEvent event) {
         WorldScanner scanner = new WorldScanner();
-        Set<Long> seeds = new HashSet<>();
-        while (seeds.size() < config().desiredSeeds) {
+        int count = 0;
+        while (count < config().desiredSeeds) {
             Optional<Long> seed = scanner.scanWorld();
             if (seed.isPresent()) {
-                seeds.add(seed.get());
-                logger().info("Stored seed (current count: " + seeds.size() + ")");
-            }
-        }
-        logger().info("Saving " + seeds.size() + " to disk");
-        try {
-            Files.createFile(seedStore.toPath());
-            try (FileWriter writer = new FileWriter(seedStore)) {
-                seeds.forEach(s -> {
-                    try {
-                        writer.write(s + "\n");
-                    } catch (IOException ex) {
-                        throw new RuntimeException("Failed to write seed to disk", ex);
+                try {
+                    if (!seedStore.exists()) {
+                        Files.createFile(seedStore.toPath());
                     }
-                });
+                    try (FileWriter writer = new FileWriter(seedStore)) {
+                        writer.write(seed.get() + "\n");
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException("Failed to write seeds to disk", ex);
+                }
+                count++;
+                logger().info("Stored seed (current count: " + count + ")");
             }
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to write seeds to disk", ex);
         }
     }
 

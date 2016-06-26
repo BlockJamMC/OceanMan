@@ -28,6 +28,7 @@ import static org.spongepowered.api.Sponge.getServer;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetypes;
@@ -104,6 +105,7 @@ public class WorldScanner {
             }
             if (wp != null) {
                 wp.setEnabled(false);
+                Sponge.getServer().renameWorld(wp, "oceanman1");
                 Sponge.getServer().deleteWorld(wp);
             }
         }
