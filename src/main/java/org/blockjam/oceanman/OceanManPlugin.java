@@ -42,9 +42,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Main plugin class.
@@ -86,7 +84,7 @@ public class OceanManPlugin {
                     if (!seedStore.exists()) {
                         Files.createFile(seedStore.toPath());
                     }
-                    try (FileWriter writer = new FileWriter(seedStore)) {
+                    try (FileWriter writer = new FileWriter(seedStore, true)) {
                         writer.write(seed.get() + "\n");
                     }
                 } catch (IOException ex) {

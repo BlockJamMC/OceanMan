@@ -28,18 +28,15 @@ import static org.spongepowered.api.Sponge.getServer;
 
 import com.google.common.collect.Sets;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
