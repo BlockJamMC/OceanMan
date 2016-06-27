@@ -31,6 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldArchetypes;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
@@ -38,7 +39,9 @@ import org.spongepowered.api.world.storage.WorldProperties;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public class WorldScanner {
 
@@ -52,14 +55,14 @@ public class WorldScanner {
     public Optional<Long> scanWorld() {
         WorldProperties wp = null;
         try {
-            while (Sponge.getServer().getWorldProperties("oceanman").isPresent()) {
-            }
+            UUID id = UUID.randomUUID();
+            WorldArchetype wa = WorldArchetype.builder().build(id.toString(), id.toString());
             OceanManPlugin.logger().info("Creating new world");
-            wp = Sponge.getServer().createWorldProperties("oceanman", WorldArchetypes.OVERWORLD);
+            wp = Sponge.getServer().createWorldProperties(id.toString(), wa);
             Sponge.getServer().saveWorldProperties(wp);
             long seed = wp.getSeed();
             OceanManPlugin.logger().info("Starting scan for seed " + seed);
-            world = getServer().loadWorld("oceanman").get();
+            world = getServer().loadWorld(id.toString()).get();
             total = 0;
             ocean = 0;
 
@@ -105,7 +108,7 @@ public class WorldScanner {
             }
             if (wp != null) {
                 wp.setEnabled(false);
-                Sponge.getServer().renameWorld(wp, "oceanman1");
+                Sponge.getServer().saveWorldProperties(wp);
                 Sponge.getServer().deleteWorld(wp);
             }
         }
